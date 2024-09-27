@@ -4,7 +4,7 @@ import com.hoppipotame.discord.domain.model.SearchQuery
 import com.hoppipotame.discord.domain.model.Torrent
 import com.hoppipotame.discord.domain.model.TorrentSource
 import com.hoppipotame.discord.infrastructure.adapter.SearchTorrentAdapter
-import com.hoppipotame.discord.infrastructure.provider.TorrentProvider
+import com.hoppipotame.discord.infrastructure.provider.catalog.TorrentProvider
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

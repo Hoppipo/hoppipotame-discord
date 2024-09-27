@@ -1,13 +1,18 @@
 package com.hoppipotame.discord
 
+import com.hoppipotame.discord.domain.model.HashQuery
+import com.hoppipotame.discord.domain.model.MagnetQuery
 import com.hoppipotame.discord.domain.model.SearchQuery
 import com.hoppipotame.discord.domain.model.Torrent
-import com.hoppipotame.discord.domain.port.inBound.SearchTorrentUseCase
 import com.hoppipotame.discord.domain.services.TorrentService
 import com.hoppipotame.discord.domain.services.catalog.AggregateSourceCatalog
+import com.hoppipotame.discord.infrastructure.adapter.ExternalDemagnetize
 import com.hoppipotame.discord.infrastructure.adapter.SearchTorrentAdapter
-import com.hoppipotame.discord.infrastructure.provider.PirateBayTorrentProvider
-import com.hoppipotame.discord.infrastructure.provider.YifyTorrentProvider
+import com.hoppipotame.discord.infrastructure.provider.ITorrentClient
+import com.hoppipotame.discord.infrastructure.provider.MagnetToTorrentClient
+import com.hoppipotame.discord.infrastructure.provider.catalog.PirateBayTorrentProvider
+import com.hoppipotame.discord.infrastructure.provider.catalog.YifyTorrentProvider
+import com.hoppipotame.discord.infrastructure.service.FileSaver
 import dev.kord.common.entity.ButtonStyle.Secondary
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -29,7 +34,10 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 private val httpClient = HttpClient {
-    install(Logging)
+    install(Logging){
+        level = LogLevel.ALL
+        logger = Logger.DEFAULT
+    }
     install(ContentNegotiation) {
         json(Json {
             ignoreUnknownKeys = true
@@ -39,7 +47,7 @@ private val httpClient = HttpClient {
 
 private val messageDataMap: MutableMap<Snowflake, Torrent> = mutableMapOf()
 
-private val searchTorrentUserCase: SearchTorrentUseCase = TorrentService(
+private val searchTorrentUserCase: TorrentService = TorrentService(
     catalog = AggregateSourceCatalog(
         searchTorrentPort = SearchTorrentAdapter(
             torrentProviders = listOf(
@@ -47,6 +55,13 @@ private val searchTorrentUserCase: SearchTorrentUseCase = TorrentService(
                 PirateBayTorrentProvider("https://apibay.org", httpClient)
             )
         )
+    ),
+    demagnetizePort = ExternalDemagnetize(
+        iTorrentClient = ITorrentClient("https://itorrents.org", httpClient),
+        magnetToTorrentClient = MagnetToTorrentClient("https://magnet2torrent.com", httpClient),
+        fileSaver = FileSaver(
+            torrentFolder = "torrents"
+        ),
     )
 )
 
@@ -58,7 +73,7 @@ suspend fun main() {
     kord.on<ButtonInteractionCreateEvent> {
         when (interaction.data.data.customId.value) {
             "download_torrent" -> handleDownloadTorrent(interaction)
-            else -> TODO()
+            else -> {}
         }
     }
 
@@ -66,9 +81,9 @@ suspend fun main() {
         if (message.author?.isBot != false) return@on
         val words = message.content.split(" ")
         when (words.firstOrNull()) {
-            "!search", "!movie" -> {
-                search(words.drop(1).joinToString(" "))
-            }
+            "!search" -> search(words.drop(1).joinToString(" "))
+            "!hash" -> downloadHash(words.drop(1).joinToString(" "))
+            "!magnet" -> downloadMagnet(words.drop(1).joinToString(" "))
         }
     }
 
@@ -78,12 +93,36 @@ suspend fun main() {
     }
 }
 
+private suspend fun MessageCreateEvent.downloadMagnet(magnet: String) {
+    val reply = message.reply {
+        suppressNotifications = true
+        content = "⏳ In progress... "
+    }
+    val magnetQuery = MagnetQuery(magnet)
+    searchTorrentUserCase.downloadMagnet(magnetQuery)
+    reply.edit {
+        content = "✅ Finished"
+    }
+}
+
+private suspend fun MessageCreateEvent.downloadHash(hash: String) {
+    val reply = message.reply {
+        suppressNotifications = true
+        content = "⏳ In progress... "
+    }
+    val hashQuery = HashQuery(hash)
+    searchTorrentUserCase.downloadHash(hashQuery)
+    reply.edit {
+        content = "✅ Finished"
+    }
+}
+
 suspend fun handleDownloadTorrent(buttonInteraction: ButtonInteraction) {
     buttonInteraction.message.channel.getMessage(buttonInteraction.message.id).edit {
         actionRow {
             interactionButton(Secondary, "downloading") {
                 disabled = true
-                label = "Downloading ⏳"
+                label = "⏳ In progress... "
             }
         }
     }
@@ -93,14 +132,13 @@ suspend fun handleDownloadTorrent(buttonInteraction: ButtonInteraction) {
         actionRow {
             interactionButton(Secondary, "downloaded") {
                 disabled = true
-                label = "Downloaded ✅"
+                label = "✅ Finished"
             }
         }
     }
 }
 
 private suspend fun MessageCreateEvent.search(query: String) {
-    println("Search $query")
     val searchTorrent = searchTorrentUserCase.searchTorrent(SearchQuery(query))
     if (searchTorrent.isEmpty()) {
         message.reply {
@@ -109,15 +147,15 @@ private suspend fun MessageCreateEvent.search(query: String) {
         }
     }
     searchTorrent.forEachIndexed { index, torrent ->
-            val messageCreated = message.channel.createMessage {
-                suppressNotifications = true
-                content = "${index + 1}. ${torrent.name}"
-                actionRow {
-                    interactionButton(Secondary, "download_torrent") {
-                        label = "Get from ${torrent.source.displayName}"
-                    }
+        val messageCreated = message.channel.createMessage {
+            suppressNotifications = true
+            content = "${index + 1}. ${torrent.name}"
+            actionRow {
+                interactionButton(Secondary, "download_torrent") {
+                    label = "Get from ${torrent.source.displayName}"
                 }
             }
-            messageDataMap[messageCreated.id] = torrent
         }
+        messageDataMap[messageCreated.id] = torrent
+    }
 }

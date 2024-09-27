@@ -1,8 +1,11 @@
 package com.hoppipotame.discord.services
 
+import com.hoppipotame.discord.domain.model.HashQuery
+import com.hoppipotame.discord.domain.model.MagnetQuery
 import com.hoppipotame.discord.domain.model.SearchQuery
 import com.hoppipotame.discord.domain.model.Torrent
 import com.hoppipotame.discord.domain.model.TorrentSource.YIFY
+import com.hoppipotame.discord.domain.port.outBound.DemagnetizePort
 import com.hoppipotame.discord.domain.services.TorrentService
 import com.hoppipotame.discord.domain.services.catalog.TorrentCatalog
 import org.junit.jupiter.api.Test
@@ -16,9 +19,17 @@ class InMemoryTorrentCatalog : TorrentCatalog {
     override fun search(query: SearchQuery): List<Torrent> = listOfNotNull(catalog[query.query])
 }
 
+class DummyDemagnetize : DemagnetizePort {
+    override fun fromHash(hashQuery: HashQuery) {
+    }
+
+    override fun fromMagnet(magnetQuery: MagnetQuery) {
+    }
+}
+
 class TorrentServiceTest {
 
-    private val searchTorrentUserCase = TorrentService(InMemoryTorrentCatalog())
+    private val searchTorrentUserCase = TorrentService(InMemoryTorrentCatalog(), DummyDemagnetize())
 
     @Test
     fun `should return a list of torrents matching the query`() {

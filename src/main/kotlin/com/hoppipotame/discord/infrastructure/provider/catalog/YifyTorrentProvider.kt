@@ -1,4 +1,4 @@
-package com.hoppipotame.discord.infrastructure.provider
+package com.hoppipotame.discord.infrastructure.provider.catalog
 
 import com.hoppipotame.discord.domain.model.SearchQuery
 import com.hoppipotame.discord.domain.model.Torrent
@@ -27,7 +27,6 @@ class YifyTorrentProvider(private val url: String, private val httpClient: HttpC
         source == torrentSource
 
     override fun search(searchQuery: SearchQuery): List<Torrent> {
-        Runtime.getRuntime().exec(arrayOf("mkdir icicestparis"))
         return runBlocking {
             httpClient.request(url + "/ajax/search?query=${searchQuery.query}")
                 .body<YifySearchResult>()

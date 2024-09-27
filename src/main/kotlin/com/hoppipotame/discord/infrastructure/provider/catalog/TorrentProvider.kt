@@ -1,4 +1,4 @@
-package com.hoppipotame.discord.infrastructure.provider
+package com.hoppipotame.discord.infrastructure.provider.catalog
 
 import com.hoppipotame.discord.domain.model.SearchQuery
 import com.hoppipotame.discord.domain.model.Torrent

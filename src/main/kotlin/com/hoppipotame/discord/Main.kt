@@ -68,6 +68,7 @@ private val searchTorrentUserCase: TorrentService = TorrentService(
 suspend fun main() {
 
     val token = System.getenv("HOPPIPOTAME_DISCORD_TOKEN")
+    println(token)
     val kord = Kord(token)
 
     kord.on<ButtonInteractionCreateEvent> {

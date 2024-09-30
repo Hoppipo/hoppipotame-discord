@@ -7,4 +7,4 @@ enum class TorrentSource(val displayName: String) {
     OTHER("Other")
 }
 
-data class Torrent(val name: String, val leacher: Int?, val seeder: Int?, val source: TorrentSource)
+data class Torrent(val downloadData: String, val name: String, val leacher: Int?, val seeder: Int?, val source: TorrentSource)

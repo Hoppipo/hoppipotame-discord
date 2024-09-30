@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 
 class InMemoryTorrentCatalog : TorrentCatalog {
     private val catalog: Map<String, Torrent> = mapOf(
-        "harry potter" to Torrent("Harry potter", 0, 0, YIFY),
+        "harry potter" to Torrent("", "Harry potter", 0, 0, YIFY),
     )
 
     override fun search(query: SearchQuery): List<Torrent> = listOfNotNull(catalog[query.query])
@@ -35,7 +35,7 @@ class TorrentServiceTest {
     fun `should return a list of torrents matching the query`() {
         val matchingQuery = SearchQuery("harry potter", 3)
         val searchResult = searchTorrentUserCase.searchTorrent(matchingQuery)
-        val expectedSearchResult = listOf(Torrent("Harry potter", 0, 0, YIFY))
+        val expectedSearchResult = listOf(Torrent("", "Harry potter", 0, 0, YIFY))
         assertEquals(expectedSearchResult, searchResult)
     }
 

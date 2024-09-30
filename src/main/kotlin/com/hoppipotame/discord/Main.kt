@@ -30,7 +30,6 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 private val httpClient = HttpClient {
@@ -60,7 +59,7 @@ private val searchTorrentUserCase: TorrentService = TorrentService(
         iTorrentClient = ITorrentClient("https://itorrents.org", httpClient),
         magnetToTorrentClient = MagnetToTorrentClient("https://magnet2torrent.com", httpClient),
         fileSaver = FileSaver(
-            torrentFolder = System.getenv("HOPPIPOTAME_DOWNLOAD_FOLDER") ?: "torrent"
+            torrentFolder = "/downloads"
         ),
     )
 )
@@ -128,7 +127,8 @@ suspend fun handleDownloadTorrent(buttonInteraction: ButtonInteraction) {
         }
     }
     buttonInteraction.deferPublicMessageUpdate()
-    delay(2000)
+    searchTorrentUserCase.downloadMagnet(messageDataMap[buttonInteraction.message.id]!!)
+//    down/
     buttonInteraction.message.channel.getMessage(buttonInteraction.message.id).edit {
         actionRow {
             interactionButton(Secondary, "downloaded") {
@@ -140,7 +140,7 @@ suspend fun handleDownloadTorrent(buttonInteraction: ButtonInteraction) {
 }
 
 private suspend fun MessageCreateEvent.search(query: String, size: Int) {
-    val searchTorrent = searchTorrentUserCase.searchTorrent(SearchQuery(query, size))
+    val searchTorrent: List<Torrent> = searchTorrentUserCase.searchTorrent(SearchQuery(query, size))
     if (searchTorrent.isEmpty()) {
         message.reply {
             suppressNotifications = true

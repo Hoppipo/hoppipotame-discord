@@ -26,4 +26,8 @@ class TorrentService(private val catalog: TorrentCatalog,
     override fun downloadMagnet(magnetQuery: MagnetQuery) {
         demagnetizePort.fromMagnet(magnetQuery)
     }
+
+    override fun downloadMagnet(magnetQuery: Torrent) {
+        demagnetizePort.fromHash(HashQuery(magnetQuery.downloadData))
+    }
 }

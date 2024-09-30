@@ -16,7 +16,7 @@ class FakeTorrentProvider(
         this.source == source
 
     override fun search(searchQuery: SearchQuery): List<Torrent> =
-        listOf(Torrent(name, 0, 0, source))
+        listOf(Torrent("", name, 0, 0, source))
 
 }
 
@@ -41,7 +41,7 @@ class SearchTorrentAdapterTest {
             )
         )
         val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName, 3), torrentSource)
-        val expectedResult = listOf(Torrent(torrentName, 0, 0, torrentSource))
+        val expectedResult = listOf(Torrent("", torrentName, 0, 0, torrentSource))
         assertEquals(searchResult, expectedResult)
     }
 
@@ -56,7 +56,7 @@ class SearchTorrentAdapterTest {
             )
         )
         val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName, 3), torrentSource)
-        val expectedResult = listOf(Torrent(torrentName, 0, 0, torrentSource))
+        val expectedResult = listOf(Torrent("", torrentName, 0, 0, torrentSource))
         assertEquals(searchResult, expectedResult)
     }
 }

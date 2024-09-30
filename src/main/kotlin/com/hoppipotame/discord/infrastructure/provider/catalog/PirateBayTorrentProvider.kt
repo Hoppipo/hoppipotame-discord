@@ -37,6 +37,6 @@ class PirateBayTorrentProvider(private val url: String, private val httpClient: 
                 .body<List<SearchResultItem>>()
         }
             .filter { item -> item.name != "No results returned" }
-            .map { item -> Torrent(item.name, item.leechers.toInt(), item.seeders.toInt(), torrentSource) }
+            .map { item -> Torrent(item.info_hash ,item.name, item.leechers.toInt(), item.seeders.toInt(), torrentSource) }
     }
 }

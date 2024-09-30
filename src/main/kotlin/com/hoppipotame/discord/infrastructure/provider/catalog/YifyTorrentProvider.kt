@@ -30,6 +30,6 @@ class YifyTorrentProvider(private val url: String, private val httpClient: HttpC
         return runBlocking {
             httpClient.request(url + "/ajax/search?query=${searchQuery.query}")
                 .body<YifySearchResult>()
-        }.data.map { item -> Torrent(item.title, null, null, torrentSource) }
+        }.data.map { item -> Torrent(url, item.title, null, null, torrentSource) }
     }
 }

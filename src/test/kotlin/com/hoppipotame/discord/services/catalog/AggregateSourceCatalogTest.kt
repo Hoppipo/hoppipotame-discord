@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 class IdentifySearchTorrentPort(private val movieName: String) : SearchTorrentPort {
     override fun searchTorrent(searchQuery: SearchQuery, source: TorrentSource): List<Torrent> =
-        listOf(Torrent(movieName, 0, 0, source))
+        listOf(Torrent("", movieName, 0, 0, source))
 }
 
 class AggregateSourceCatalogTest {
@@ -22,7 +22,7 @@ class AggregateSourceCatalogTest {
         val movieName = "Harry potter"
         torrentCatalogAdapter = AggregateSourceCatalog(IdentifySearchTorrentPort(movieName))
         val aggregatedSearchResult = torrentCatalogAdapter.search(SearchQuery(movieName, 3))
-        val expectedAggregateResult = TorrentSource.entries.map { source -> Torrent(movieName, 0, 0, source) }
+        val expectedAggregateResult = TorrentSource.entries.map { source -> Torrent("", movieName, 0, 0, source) }
         assertEquals(aggregatedSearchResult, expectedAggregateResult)
     }
 }

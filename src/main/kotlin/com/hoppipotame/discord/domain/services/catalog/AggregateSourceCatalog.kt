@@ -14,7 +14,7 @@ class AggregateSourceCatalog(private val searchTorrentPort: SearchTorrentPort) :
             TorrentSource.entries.map { source ->
                 async {
                     try {
-                        searchTorrentPort.searchTorrent(query, source).take(3)
+                        searchTorrentPort.searchTorrent(query, source).take(query.size)
                     } catch (e: Exception) {
                         println(e.message)
                         emptyList()

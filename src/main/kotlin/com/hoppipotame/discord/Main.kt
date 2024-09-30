@@ -60,13 +60,14 @@ private val searchTorrentUserCase: TorrentService = TorrentService(
         iTorrentClient = ITorrentClient("https://itorrents.org", httpClient),
         magnetToTorrentClient = MagnetToTorrentClient("https://magnet2torrent.com", httpClient),
         fileSaver = FileSaver(
-            torrentFolder = "torrents"
+            torrentFolder = System.getenv("HOPPIPOTAME_DOWNLOAD_FOLDER") ?: "torrent"
         ),
     )
 )
 
 suspend fun main() {
 
+    val searchSize = System.getenv("HOPPIPOTAME_SEARCH_RESULT_SIZE")?.toInt() ?: 10
     val token = System.getenv("HOPPIPOTAME_DISCORD_TOKEN")
     val kord = Kord(token)
 
@@ -81,7 +82,7 @@ suspend fun main() {
         if (message.author?.isBot != false) return@on
         val words = message.content.split(" ")
         when (words.firstOrNull()) {
-            "!search" -> search(words.drop(1).joinToString(" "))
+            "!search" -> search(words.drop(1).joinToString(" "), searchSize)
             "!hash" -> downloadHash(words.drop(1).joinToString(" "))
             "!magnet" -> downloadMagnet(words.drop(1).joinToString(" "))
         }
@@ -138,8 +139,8 @@ suspend fun handleDownloadTorrent(buttonInteraction: ButtonInteraction) {
     }
 }
 
-private suspend fun MessageCreateEvent.search(query: String) {
-    val searchTorrent = searchTorrentUserCase.searchTorrent(SearchQuery(query))
+private suspend fun MessageCreateEvent.search(query: String, size: Int) {
+    val searchTorrent = searchTorrentUserCase.searchTorrent(SearchQuery(query, size))
     if (searchTorrent.isEmpty()) {
         message.reply {
             suppressNotifications = true

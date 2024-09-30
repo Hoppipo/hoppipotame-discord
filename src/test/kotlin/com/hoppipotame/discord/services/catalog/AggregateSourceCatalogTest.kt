@@ -21,7 +21,7 @@ class AggregateSourceCatalogTest {
     fun `should aggregate search result from all torrent source`() {
         val movieName = "Harry potter"
         torrentCatalogAdapter = AggregateSourceCatalog(IdentifySearchTorrentPort(movieName))
-        val aggregatedSearchResult = torrentCatalogAdapter.search(SearchQuery(movieName))
+        val aggregatedSearchResult = torrentCatalogAdapter.search(SearchQuery(movieName, 3))
         val expectedAggregateResult = TorrentSource.entries.map { source -> Torrent(movieName, 0, 0, source) }
         assertEquals(aggregatedSearchResult, expectedAggregateResult)
     }

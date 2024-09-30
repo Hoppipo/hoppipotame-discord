@@ -27,7 +27,7 @@ class SearchTorrentAdapterTest {
     @Test
     fun `should return empty torrent list when there is no matching torrent provider`() {
         searchTorrentAdapter = SearchTorrentAdapter(emptyList())
-        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery("Harry potter"), TorrentSource.YIFY)
+        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery("Harry potter", 3), TorrentSource.YIFY)
         assertEquals(searchResult, emptyList())
     }
 
@@ -40,7 +40,7 @@ class SearchTorrentAdapterTest {
                 FakeTorrentProvider(torrentName, torrentSource)
             )
         )
-        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName), torrentSource)
+        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName, 3), torrentSource)
         val expectedResult = listOf(Torrent(torrentName, 0, 0, torrentSource))
         assertEquals(searchResult, expectedResult)
     }
@@ -55,7 +55,7 @@ class SearchTorrentAdapterTest {
                 FakeTorrentProvider(torrentName, TorrentSource.OTHER)
             )
         )
-        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName), torrentSource)
+        val searchResult = searchTorrentAdapter.searchTorrent(SearchQuery(torrentName, 3), torrentSource)
         val expectedResult = listOf(Torrent(torrentName, 0, 0, torrentSource))
         assertEquals(searchResult, expectedResult)
     }

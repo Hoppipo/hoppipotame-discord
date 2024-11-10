@@ -33,7 +33,7 @@ class TorrentServiceTest {
 
     @Test
     fun `should return a list of torrents matching the query`() {
-        val matchingQuery = SearchQuery("harry potter", 3)
+        val matchingQuery = SearchQuery("harry potter")
         val searchResult = searchTorrentUserCase.searchTorrent(matchingQuery)
         val expectedSearchResult = listOf(Torrent("", "Harry potter", 0, 0, YIFY))
         assertEquals(expectedSearchResult, searchResult)
@@ -41,7 +41,7 @@ class TorrentServiceTest {
 
     @Test
     fun `should return an empty list if no torrents match the query`() {
-        val notMatchingQuery = SearchQuery("le seigneur des anneaux", 3)
+        val notMatchingQuery = SearchQuery("le seigneur des anneaux")
         val searchResult = searchTorrentUserCase.searchTorrent(notMatchingQuery)
         assertEquals(emptyList(), searchResult)
     }
